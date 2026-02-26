@@ -12,6 +12,7 @@ from .handlers import (
     handle_analysis_step1,
     handle_analysis_step2,
     handle_analysis_step3,
+    handle_compare_results,
     handle_eval,
 )
 
@@ -45,6 +46,10 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "categorize",
         help="Alias of analysis-step3: assign categories to reason bullets",
     )
+    compare_parser = subparsers.add_parser(
+        "compare-results",
+        help="Compare two analysis result markdown files",
+    )
 
     eval_parser.add_argument("input", type=Path, help="Path to input file (.pdf or text)")
     analysis_parser.add_argument("input", type=Path, help="Path to input PDF file or directory")
@@ -53,6 +58,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     step3_parser.add_argument("input", type=Path, help="Path to reasons text file")
     bullet_points_parser.add_argument("input", type=Path, help="Path to narration text file")
     categorize_parser.add_argument("input", type=Path, help="Path to reasons text file")
+    compare_parser.add_argument("left", type=Path, help="First result markdown file")
+    compare_parser.add_argument("right", type=Path, help="Second result markdown file")
+    compare_parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Optional output file path (e.g. outputs/compare.md)",
+    )
 
     for target_parser in [
         eval_parser,
@@ -118,5 +131,6 @@ def main(argv: list[str] | None = None) -> int:
         "analysis-step3": handle_analysis_step3,
         "bullet-points": handle_analysis_step2,
         "categorize": handle_analysis_step3,
+        "compare-results": handle_compare_results,
     }
     return handlers[args.command](args)

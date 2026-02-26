@@ -24,6 +24,10 @@ from recdemo.pipeline.batch_analysis import (
     run_analysis_for_directory,
 )
 from recdemo.pipeline.eval_pipeline import run_eval
+from recdemo.pipeline.result_comparison import (
+    build_comparison_report,
+    parse_report,
+)
 from recdemo.prompt.builders import (
     build_category_definition,
     build_system_prompt,
@@ -236,4 +240,31 @@ def handle_analysis_step3(args: argparse.Namespace) -> int:
         return 1
 
     print(categorized)
+    return 0
+
+
+def handle_compare_results(args: argparse.Namespace) -> int:
+    left_path: Path = args.left
+    right_path: Path = args.right
+    output_path: Path | None = args.output
+
+    for p in [left_path, right_path]:
+        if not p.exists():
+            print(f"Input file not found: {p}", file=sys.stderr)
+            return 1
+
+    try:
+        left = parse_report(left_path)
+        right = parse_report(right_path)
+        content = build_comparison_report(left, right)
+    except Exception as exc:
+        print(f"Compare failed: {exc}", file=sys.stderr)
+        return 1
+
+    if output_path is not None:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(content, encoding="utf-8")
+        print(f"DONE! Output written to: {output_path}")
+    else:
+        print(content)
     return 0

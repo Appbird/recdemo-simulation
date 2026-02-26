@@ -31,6 +31,8 @@
   - depends on: `recdemo.llm.client`, `recdemo.prompt.builders`
 - `recdemo.pipeline.batch_analysis`
   - depends on: `recdemo.io.content_loader`, `recdemo.pipeline.analysis_pipeline`
+- `recdemo.pipeline.result_comparison`
+  - depends on: (none; markdown parser/formatter only)
 - `recdemo.prompt.builders`
   - depends on: `recdemo.core.paths`
 - `recdemo.io.content_loader`
@@ -97,6 +99,7 @@
 - `eval` は実質 step1 相当の生成コマンド。
 - `bullet-points` は `analysis-step2` のエイリアス。
 - `categorize` は `analysis-step3` のエイリアス。
+- `compare-results` は2つの集計Markdownを比較する補助コマンド。
 
 ## 補足
 

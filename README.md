@@ -98,6 +98,19 @@ uv run src/cli.py bullet-points narration.txt --llm L
 uv run src/cli.py categorize reasons.txt --llm L
 ```
 
+### 4. 2つの集計結果を比較
+
+```bash
+uv run src/cli.py compare-results outputs/actual-talk.md outputs/llm-simulation.md
+uv run src/cli.py compare-results outputs/actual-talk.md outputs/llm-simulation.md --output outputs/compare.md
+```
+
+出力内容:
+- 観点別 該当研究数の比較表
+- 観点ごとの差分（B-A）
+- 増減サマリ
+- 研究ごとの語り比較（A/Bの語り本文を直接比較）
+
 ## プロンプトファイル
 
 `src/prompt/` 配下で管理:
