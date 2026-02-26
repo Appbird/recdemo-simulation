@@ -41,6 +41,22 @@ class DirectoryAnalysisResult:
     root_dir: Path
     successes: tuple[FileAnalysisResult, ...]
     failures: tuple[FileAnalysisError, ...]
+    category_names: tuple[str, ...]
+
+
+def parse_category_names(category_definition: str) -> tuple[str, ...]:
+    names: list[str] = []
+    for raw_line in category_definition.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        match = re.match(r"^\d+\.\s*(.+)$", line)
+        if match:
+            names.append(match.group(1).strip())
+
+    if "その他" not in names:
+        names.append("その他")
+    return tuple(names)
 
 
 def discover_input_files(root_dir: Path) -> list[Path]:
@@ -146,6 +162,7 @@ def run_analysis_for_directory(
             root_dir=root_dir,
             successes=tuple(),
             failures=tuple(),
+            category_names=parse_category_names(category_definition),
         )
 
     logger.info("directory analysis: %d files discovered under %s", len(files), root_dir)
@@ -179,6 +196,7 @@ def run_analysis_for_directory(
         root_dir=root_dir,
         successes=tuple(successes),
         failures=tuple(failures),
+        category_names=parse_category_names(category_definition),
     )
 
 
@@ -213,11 +231,14 @@ def format_directory_report(result: DirectoryAnalysisResult) -> str:
     lines.append("- [研究ごとの観点比較](#研究ごとの観点比較)")
     lines.append("- [観点ごとの評価比較](#観点ごとの評価比較)")
 
-    if per_category:
-        lines.append("\n## 観点別 該当研究数")
-        for category in sorted(per_category):
-            study_count = len({research_key for research_key, _, _ in per_category[category]})
-            lines.append(f"- {category}: {study_count} 件")
+    lines.append("\n## 観点別 該当研究数")
+    all_categories = list(result.category_names)
+    for category in sorted(per_category):
+        if category not in all_categories:
+            all_categories.append(category)
+    for category in all_categories:
+        study_count = len({research_key for research_key, _, _ in per_category.get(category, [])})
+        lines.append(f"- {category}: {study_count} 件")
 
     lines.append("\n## 失敗ファイル")
     if result.failures:
@@ -251,11 +272,15 @@ def format_directory_report(result: DirectoryAnalysisResult) -> str:
             lines.append(f"- [{category_label}] {item.reason}")
 
     lines.append("\n## 観点ごとの評価比較")
-    for category in sorted(per_category):
+    for category in all_categories:
         lines.append(f"\n### {category}")
-        study_count = len({research_key for research_key, _, _ in per_category[category]})
+        entries = per_category.get(category, [])
+        study_count = len({research_key for research_key, _, _ in entries})
         lines.append(f"- 該当研究数: {study_count}")
-        for _, rel_path, reason in per_category[category]:
+        if not entries:
+            lines.append("- 該当なし")
+            continue
+        for _, rel_path, reason in entries:
             lines.append(f"- ({rel_path}) {reason}")
 
     return "\n".join(lines)
