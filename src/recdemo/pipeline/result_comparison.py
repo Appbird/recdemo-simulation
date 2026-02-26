@@ -182,7 +182,7 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
         only_b_categories = sorted(b_categories - a_categories)
         only_a_text = ", ".join(only_a_categories) if only_a_categories else "-"
         only_b_text = ", ".join(only_b_categories) if only_b_categories else "-"
-        lines.append(f"| {key} | {only_a_text} | {only_b_text} |")
+        lines.append(f"| [{key}](#{_anchor_slug(key)}) | {only_a_text} | {only_b_text} |")
 
     lines.append("\n## 研究ごとの差分詳細")
     for key in research_keys:
