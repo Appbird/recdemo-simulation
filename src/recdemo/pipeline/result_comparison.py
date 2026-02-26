@@ -12,6 +12,15 @@ class ParsedReport:
     research_points: dict[str, list[str]]
 
 
+def _anchor_slug(text: str) -> str:
+    slug = text.strip().lower().replace(" ", "-")
+    allowed = []
+    for ch in slug:
+        if ch.isalnum() or ch in {"-", "_"} or ord(ch) > 127:
+            allowed.append(ch)
+    return "".join(allowed)
+
+
 def _extract_categories_from_point(point: str) -> tuple[str, ...]:
     # Format: [カテゴリ] 理由 or [カテゴリ1, カテゴリ2] 理由
     if not point.startswith("[") or "]" not in point:
@@ -147,6 +156,13 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
     lines.append("# 比較結果")
     lines.append(f"- A: {left.source}")
     lines.append(f"- B: {right.source}")
+    lines.append("\n## 目次")
+    lines.append("- [観点別 該当研究数 差分](#観点別-該当研究数-差分)")
+    lines.append("- [研究ごとの観点比較表](#研究ごとの観点比較表)")
+    lines.append("- [研究ごとの差分詳細](#研究ごとの差分詳細)")
+    for key in research_keys:
+        lines.append(f"- [研究: {key}](#{_anchor_slug(key)})")
+
     lines.append("\n## 観点別 該当研究数 差分")
     lines.append("| 観点 | A | B | B-A |")
     lines.append("| --- | ---: | ---: | ---: |")
@@ -156,102 +172,51 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
         b = right.category_counts.get(category, 0)
         lines.append(f"| {category} | {a} | {b} | {b - a:+d} |")
 
-    lines.append("\n## 増減サマリ")
-    increases = [(c, right.category_counts.get(c, 0) - left.category_counts.get(c, 0)) for c in categories]
-    inc_only = [(c, d) for c, d in increases if d > 0]
-    dec_only = [(c, d) for c, d in increases if d < 0]
-    flat_only = [c for c, d in increases if d == 0]
-
-    if inc_only:
-        lines.append("- 増加:")
-        for c, d in sorted(inc_only, key=lambda x: x[1], reverse=True):
-            lines.append(f"  - {c}: +{d}")
-    if dec_only:
-        lines.append("- 減少:")
-        for c, d in sorted(dec_only, key=lambda x: x[1]):
-            lines.append(f"  - {c}: {d}")
-    if flat_only:
-        lines.append("- 変化なし:")
-        for c in flat_only:
-            lines.append(f"  - {c}")
-
-    lines.append("\n## 研究ごとの観点増減（表）")
-    lines.append("| 研究 | 増えた観点 (B-A) | 減った観点 (A-B) |")
+    lines.append("\n## 研究ごとの観点比較表")
+    lines.append("| 研究 | Aにしかない観点 | Bにしかない観点 |")
     lines.append("| --- | --- | --- |")
     for key in research_keys:
         a_categories = _collect_research_categories(left.research_points.get(key))
         b_categories = _collect_research_categories(right.research_points.get(key))
-        added = sorted(b_categories - a_categories)
-        removed = sorted(a_categories - b_categories)
-        added_text = ", ".join(added) if added else "-"
-        removed_text = ", ".join(removed) if removed else "-"
-        lines.append(f"| {key} | {added_text} | {removed_text} |")
+        only_a_categories = sorted(a_categories - b_categories)
+        only_b_categories = sorted(b_categories - a_categories)
+        only_a_text = ", ".join(only_a_categories) if only_a_categories else "-"
+        only_b_text = ", ".join(only_b_categories) if only_b_categories else "-"
+        lines.append(f"| {key} | {only_a_text} | {only_b_text} |")
 
-    lines.append("\n## 研究ごとの評価観点比較")
-    same_count = 0
-    diff_count = 0
-    only_a = 0
-    only_b = 0
-
+    lines.append("\n## 研究ごとの差分詳細")
     for key in research_keys:
-        a_points = left.research_points.get(key)
-        b_points = right.research_points.get(key)
-        if a_points is None:
-            only_b += 1
-            continue
-        if b_points is None:
-            only_a += 1
-            continue
-        if set(a_points) == set(b_points):
-            same_count += 1
-        else:
-            diff_count += 1
-
-    lines.append(f"- 一致: {same_count} 件")
-    lines.append(f"- 差分あり: {diff_count} 件")
-    lines.append(f"- Aのみ: {only_a} 件")
-    lines.append(f"- Bのみ: {only_b} 件")
-
-    for key in research_keys:
-        a_points = left.research_points.get(key)
-        b_points = right.research_points.get(key)
-        if a_points is None and b_points is None:
-            continue
-        lines.append(f"\n### {key}")
-        if a_points is None:
-            lines.append("- ステータス: B のみ")
-            for p in b_points or []:
-                lines.append(f"- B: {p}")
-            continue
-        if b_points is None:
-            lines.append("- ステータス: A のみ")
-            for p in a_points:
-                lines.append(f"- A: {p}")
-            continue
+        a_points = sorted(set(left.research_points.get(key, [])))
+        b_points = sorted(set(right.research_points.get(key, [])))
         a_set = set(a_points)
         b_set = set(b_points)
-        common = sorted(a_set & b_set)
         only_a_points = sorted(a_set - b_set)
         only_b_points = sorted(b_set - a_set)
 
-        if not only_a_points and not only_b_points:
-            lines.append("- ステータス: 一致")
-            for p in common:
-                lines.append(f"- 共通: {p}")
-            continue
-
-        lines.append("- ステータス: 差分あり")
-        if common:
-            lines.append("- 共通:")
-            for p in common:
-                lines.append(f"  - {p}")
+        lines.append(f"\n### {key}")
+        lines.append("\n#### Aの主張")
+        if a_points:
+            for p in a_points:
+                lines.append(f"- {p}")
+        else:
+            lines.append("- なし")
+        lines.append("\n#### Bの主張")
+        if b_points:
+            for p in b_points:
+                lines.append(f"- {p}")
+        else:
+            lines.append("- なし")
+        lines.append("\n#### Aにしかない主張")
         if only_a_points:
-            lines.append("- Aのみ:")
             for p in only_a_points:
-                lines.append(f"  - {p}")
+                lines.append(f"- {p}")
+        else:
+            lines.append("- なし")
+        lines.append("\n#### Bにしかない主張")
         if only_b_points:
-            lines.append("- Bのみ:")
             for p in only_b_points:
-                lines.append(f"  - {p}")
+                lines.append(f"- {p}")
+        else:
+            lines.append("- なし")
 
     return "\n".join(lines)
