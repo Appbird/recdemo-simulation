@@ -2,6 +2,9 @@ import re
 from pathlib import Path
 
 from recdemo.core.paths import (
+    ANALYSIS_ASSIGN_CATEGORIES_PATH,
+    ANALYSIS_EXTRACT_REASONS_PATH,
+    ANALYSIS_SYSTEM_PATH,
     CATEGORY_DEFINITION_PATH,
     REC_DEMO_EXPLANATION_PATH,
     SYSTEM_INSTRUCTION_PATH,
@@ -64,3 +67,38 @@ def build_category_definition() -> str:
         CATEGORY_DEFINITION_PATH.parent.parent / "category-definition.txt",
     )
     return strip_prompt_comment_lines(category_raw)
+
+
+def build_analysis_system_prompt() -> str:
+    raw = _read_prompt_file(
+        ANALYSIS_SYSTEM_PATH,
+        ANALYSIS_SYSTEM_PATH.parent.parent / "analysis-system.txt",
+    )
+    return strip_prompt_comment_lines(raw)
+
+
+def build_extract_reasons_prompt(narration: str) -> str:
+    raw = _read_prompt_file(
+        ANALYSIS_EXTRACT_REASONS_PATH,
+        ANALYSIS_EXTRACT_REASONS_PATH.parent.parent / "analysis-extract-reasons.txt",
+    )
+    return render_prompt_template(
+        strip_prompt_comment_lines(raw),
+        {
+            "narration": narration,
+        },
+    )
+
+
+def build_assign_categories_prompt(reasons: str, category_definition: str) -> str:
+    raw = _read_prompt_file(
+        ANALYSIS_ASSIGN_CATEGORIES_PATH,
+        ANALYSIS_ASSIGN_CATEGORIES_PATH.parent.parent / "analysis-assign-categories.txt",
+    )
+    return render_prompt_template(
+        strip_prompt_comment_lines(raw),
+        {
+            "reasons": reasons,
+            "category_definition": category_definition,
+        },
+    )

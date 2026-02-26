@@ -1,0 +1,9 @@
+% This is a comment line and should be removed.
+# Prompt Example
+あなたは${role}です。
+
+扱うテーマ: ${topic}
+対象読者: ${audience}
+
+% another comment
+要点を3つで説明してください。
