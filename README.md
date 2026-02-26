@@ -38,6 +38,26 @@ LLM が語れるからといって、Re:commend-demoを直接自動化できる�
 - [llm-simulation.md](./results/llm-simulation.md)
 - [compare.md](./results/compare.md)
 
+## 実行前提条件
+
+- `uv` がインストールされていること
+- 依存関係を同期済みであること
+
+```bash
+uv sync
+```
+
+- プロジェクト直下に `.env` を置き、使用するLLMプロバイダのAPIキーを設定していること
+  - `.env` は起動時に自動で読み込まれる（すでに環境変数がある場合はそちらを優先）
+
+例:
+
+```env
+OPENAI_API_KEY=your_api_key_here
+# 必要なら他プロバイダも設定
+# ANTHROPIC_API_KEY=...
+```
+
 ## できること
 
 ### 1. eval
