@@ -12,7 +12,7 @@ from .analysis_pipeline import run_analysis_structured
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_INPUT_SUFFIXES = {".pdf", ".txt"}
+SUPPORTED_INPUT_SUFFIXES = {".pdf"}
 
 
 @dataclass(frozen=True)

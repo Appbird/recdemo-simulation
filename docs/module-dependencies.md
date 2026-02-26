@@ -71,7 +71,7 @@
 9. stdoutへ整形済み結果を出力
 
 フォルダ入力時:
-1. `run_analysis_for_directory()` で `.pdf` / `.txt` を再帰収集
+1. `run_analysis_for_directory()` で `.pdf` を再帰収集
 2. スレッド並列で各ファイルを3段分析
 3. `format_directory_report()` で以下を比較表示
    - 研究ごとの観点比較

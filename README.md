@@ -41,18 +41,22 @@ uv run src/cli.py analysis P --llm L
 
 実行中は `INFO` ログで進捗（step 1/3〜3/3）を表示。
 
+`analysis` の入力は PDF のみ対応。
+
 フォルダを指定した場合:
 
 ```bash
 uv run src/cli.py analysis PDF/EC2024 --llm L --workers 8
 ```
 
-- フォルダ配下の `.pdf` / `.txt` を再帰探索
+- フォルダ配下の `.pdf` を再帰探索
 - 各ファイルに同じ3段分析を並列実行
 - 最後に以下をまとめて出力
   - 研究ごとの観点比較
   - 観点ごとの評価比較
   - 失敗ファイル一覧（あれば）
+
+`--workers` を省略した場合は `configs/default.toml` の `[analysis].workers` を利用。
 
 ### 3. analysis の各ステップを単体実行
 

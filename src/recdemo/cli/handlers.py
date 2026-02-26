@@ -2,7 +2,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from recdemo.core.config import load_default_model
+from recdemo.core.config import load_default_analysis_workers, load_default_model
 from recdemo.core.paths import DEFAULT_LOG_PATH
 from recdemo.core.types import EvalConfig
 from recdemo.io.content_loader import load_user_prompt_from_input
@@ -62,13 +62,16 @@ def handle_analysis(args: argparse.Namespace) -> int:
     category_definition = build_category_definition()
 
     if input_path.is_dir():
+        workers = args.workers
+        if workers is None:
+            workers = load_default_analysis_workers(args.config_path)
         try:
             batch_result = run_analysis_for_directory(
                 root_dir=input_path,
                 model=model,
                 system_prompt=system_prompt,
                 category_definition=category_definition,
-                workers=args.workers,
+                workers=workers,
             )
             report = format_directory_report(batch_result)
         except Exception as exc:
@@ -76,6 +79,10 @@ def handle_analysis(args: argparse.Namespace) -> int:
             return 1
         print(report)
         return 0
+
+    if input_path.suffix.lower() != ".pdf":
+        print(f"Analysis input must be a PDF file: {input_path}", file=sys.stderr)
+        return 1
 
     user_prompt = load_user_prompt_from_input(input_path)
 
@@ -109,6 +116,9 @@ def handle_analysis_step1(args: argparse.Namespace) -> int:
     input_path = args.input
     if not input_path.exists():
         print(f"Input file not found: {input_path}", file=sys.stderr)
+        return 1
+    if input_path.suffix.lower() != ".pdf":
+        print(f"Analysis step1 input must be a PDF file: {input_path}", file=sys.stderr)
         return 1
 
     model = args.llm or load_default_model(args.config_path)

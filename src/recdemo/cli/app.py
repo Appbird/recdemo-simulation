@@ -46,6 +46,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Alias of analysis-step3: assign categories to reason bullets",
     )
 
+    eval_parser.add_argument("input", type=Path, help="Path to input file (.pdf or text)")
+    analysis_parser.add_argument("input", type=Path, help="Path to input PDF file or directory")
+    step1_parser.add_argument("input", type=Path, help="Path to input PDF file")
+    step2_parser.add_argument("input", type=Path, help="Path to narration text file")
+    step3_parser.add_argument("input", type=Path, help="Path to reasons text file")
+    bullet_points_parser.add_argument("input", type=Path, help="Path to narration text file")
+    categorize_parser.add_argument("input", type=Path, help="Path to reasons text file")
+
     for target_parser in [
         eval_parser,
         analysis_parser,
@@ -55,7 +63,6 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         bullet_points_parser,
         categorize_parser,
     ]:
-        target_parser.add_argument("input", type=Path, help="Path to input file (.pdf or text)")
         target_parser.add_argument(
             "--llm",
             dest="llm",
@@ -73,8 +80,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     analysis_parser.add_argument(
         "--workers",
         type=int,
-        default=4,
-        help="Worker count for directory analysis (used only when input is a directory)",
+        default=None,
+        help="Worker count for directory analysis (default: configs/default.toml [analysis].workers)",
     )
 
     eval_parser.add_argument(
