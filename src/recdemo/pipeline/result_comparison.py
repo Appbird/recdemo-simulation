@@ -193,9 +193,9 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
         b = right.category_counts.get(category, 0)
         diff = b - a
         category_rows.append((category, a, b, diff))
-    category_rows.sort(key=lambda row: (-abs(row[3]), -row[3], row[0]))
+    category_rows.sort(key=lambda row: (-row[3], row[0]))
     for category, a, b, diff in category_rows:
-        lines.append(f"| {category} | {a} | {b} | {diff:+d} |")
+        lines.append(f"| **{category}** | {a} | {b} | {diff:+d} |")
 
     lines.append("\n## 研究ごとの観点比較表")
     lines.append("| 研究 | Aにしかない観点 | Bにしかない観点 |")
@@ -213,13 +213,13 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
             if idx < len(only_a_categories):
                 a_category = only_a_categories[idx]
                 a_sample = _sample_reason_for_category(a_points_raw, a_category)
-                only_a_text = f"{a_category}: {_format_table_cell(a_sample)}"
+                only_a_text = f"**{a_category}**: {_format_table_cell(a_sample)}"
             else:
                 only_a_text = "-"
             if idx < len(only_b_categories):
                 b_category = only_b_categories[idx]
                 b_sample = _sample_reason_for_category(b_points_raw, b_category)
-                only_b_text = f"{b_category}: {_format_table_cell(b_sample)}"
+                only_b_text = f"**{b_category}**: {_format_table_cell(b_sample)}"
             else:
                 only_b_text = "-"
             lines.append(f"| {study_cell} | {only_a_text} | {only_b_text} |")
