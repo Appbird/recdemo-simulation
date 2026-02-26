@@ -188,10 +188,12 @@ def format_directory_report(result: DirectoryAnalysisResult) -> str:
     root_dir = result.root_dir
     per_research: dict[str, list[CategorizedReason]] = defaultdict(list)
     per_category: dict[str, list[tuple[str, str, str]]] = defaultdict(list)
+    research_narrations: dict[str, list[tuple[str, str]]] = defaultdict(list)
 
     for success in result.successes:
         rel = success.file_path.relative_to(root_dir)
         research_key = str(rel.parent) if str(rel.parent) != "." else rel.stem
+        research_narrations[research_key].append((str(rel), success.narration))
         for item in success.items:
             per_research[research_key].append(item)
             for category in item.categories:
@@ -204,6 +206,12 @@ def format_directory_report(result: DirectoryAnalysisResult) -> str:
         f"- 成功: {len(result.successes)} 件 / 失敗: {len(result.failures)} 件"
     )
     lines.append(f"- 該当研究数: {len(per_research)} 件")
+    lines.append("\n## 目次")
+    lines.append("- [観点別 該当研究数](#観点別-該当研究数)")
+    lines.append("- [失敗ファイル](#失敗ファイル)")
+    lines.append("- [研究ごとの語り](#研究ごとの語り)")
+    lines.append("- [研究ごとの観点比較](#研究ごとの観点比較)")
+    lines.append("- [観点ごとの評価比較](#観点ごとの評価比較)")
 
     if per_category:
         lines.append("\n## 観点別 該当研究数")
@@ -211,11 +219,22 @@ def format_directory_report(result: DirectoryAnalysisResult) -> str:
             study_count = len({research_key for research_key, _, _ in per_category[category]})
             lines.append(f"- {category}: {study_count} 件")
 
+    lines.append("\n## 失敗ファイル")
     if result.failures:
-        lines.append("\n## 失敗ファイル")
         for failure in result.failures:
             rel = failure.file_path.relative_to(root_dir)
             lines.append(f"- {rel}: {failure.error_message}")
+    else:
+        lines.append("- なし")
+
+    lines.append("\n## 研究ごとの語り")
+    for research in sorted(research_narrations):
+        lines.append(f"\n### {research}")
+        for rel_path, narration in research_narrations[research]:
+            lines.append(f"- source: {rel_path}")
+            lines.append("```text")
+            lines.append(narration.strip())
+            lines.append("```")
 
     lines.append("\n## 研究ごとの観点比較")
     for research in sorted(per_research):
