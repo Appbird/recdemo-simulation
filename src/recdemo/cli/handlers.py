@@ -70,6 +70,19 @@ def handle_analysis(args: argparse.Namespace) -> int:
     output_path = args.output or load_default_analysis_output_path(args.config_path)
     input_kind = args.input_kind or load_default_analysis_input_kind(args.config_path)
 
+    def _print_compact_done(message_path: Path, content: str) -> None:
+        print(f"DONE! Output written to: {message_path}")
+        if content.startswith("# 集計結果"):
+            lines = content.splitlines()
+            summary_lines: list[str] = []
+            for line in lines[1:]:
+                if line.startswith("## "):
+                    break
+                if line.strip():
+                    summary_lines.append(line)
+            if summary_lines:
+                print("\n".join(summary_lines))
+
     if input_path.is_dir():
         workers = args.workers
         if workers is None:
@@ -90,7 +103,9 @@ def handle_analysis(args: argparse.Namespace) -> int:
         if output_path is not None:
             output_path.parent.mkdir(parents=True, exist_ok=True)
             output_path.write_text(report, encoding="utf-8")
-        print(report)
+            _print_compact_done(output_path, report)
+        else:
+            print(report)
         return 0
 
     if input_kind == INPUT_KIND_PAPER:
@@ -137,7 +152,9 @@ def handle_analysis(args: argparse.Namespace) -> int:
     if output_path is not None:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(output_text, encoding="utf-8")
-    print(output_text)
+        _print_compact_done(output_path, output_text)
+    else:
+        print(output_text)
     return 0
 
 
