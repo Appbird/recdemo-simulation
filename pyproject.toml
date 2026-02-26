@@ -9,6 +9,7 @@ dependencies = [
     "pymupdf>=1.27.1",
     "pymupdf-layout>=1.27.1",
     "pymupdf4llm>=0.3.4",
+    "rich>=14.3.3",
 ]
 
 [project.scripts]

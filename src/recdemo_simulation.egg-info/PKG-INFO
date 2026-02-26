@@ -8,6 +8,7 @@ Requires-Dist: litellm>=1.81.15
 Requires-Dist: pymupdf>=1.27.1
 Requires-Dist: pymupdf-layout>=1.27.1
 Requires-Dist: pymupdf4llm>=0.3.4
+Requires-Dist: rich>=14.3.3
 
 # Re:commend-demo Simulation
 

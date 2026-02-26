@@ -1103,6 +1103,7 @@ dependencies = [
     { name = "pymupdf" },
     { name = "pymupdf-layout" },
     { name = "pymupdf4llm" },
+    { name = "rich" },
 ]
 
 [package.metadata]
@@ -1111,6 +1112,7 @@ requires-dist = [
     { name = "pymupdf", specifier = ">=1.27.1" },
     { name = "pymupdf-layout", specifier = ">=1.27.1" },
     { name = "pymupdf4llm", specifier = ">=0.3.4" },
+    { name = "rich", specifier = ">=14.3.3" },
 ]
 
 [[package]]
