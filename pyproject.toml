@@ -10,3 +10,9 @@ dependencies = [
     "pymupdf-layout>=1.27.1",
     "pymupdf4llm>=0.3.4",
 ]
+
+[project.scripts]
+recdemo-sim = "recdemo.cli.app:main"
+
+[tool.uv]
+package = true
