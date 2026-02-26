@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
-import re
 
 
 @dataclass(frozen=True)
@@ -54,10 +53,7 @@ def _sample_reason_for_category(points: list[str], category: str) -> str:
 
 
 def _format_table_cell(text: str, max_len: int = 120) -> str:
-    # Remove parenthetical asides from table samples for readability.
-    normalized = re.sub(r"\([^)]*\)", "", text)
-    normalized = re.sub(r"（[^）]*）", "", normalized)
-    normalized = " ".join(normalized.split())
+    normalized = " ".join(text.split())
     if len(normalized) > max_len:
         normalized = normalized[: max_len - 1].rstrip() + "…"
     return normalized.replace("|", "\\|")
