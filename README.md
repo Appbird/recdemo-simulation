@@ -1,37 +1,40 @@
 # Re:commend-demo Simulation
 
-ECシンポジウム文脈の Re:commend-demo を対象に、語り生成と評価観点分析を行うCLIツール。
+ECシンポジウムの Re:commend-demo を対象に、語り生成と評価観点分析を行うCLIツール。
 
-## Re:commend-demo とは（背景）
+## Re:commend-demo とは？
 
-Re:commend-demo は、発表内容そのものの要約だけでなく、語り手自身の経験・価値観と結びついた
-「なぜ刺さったか」を語る実践を重視する取り組み。  
-このツールは、その語りの構造をECシンポジウム論文群で比較可能にすることを目的にしている。
+[情報処理学会 エンタテインメントコンピューティング(EC)研究会](https://sig.entcomp.org)のシンポジウムにて開かれるイベントの一つです。
+ECシンポジウムでは毎年大量のコンテンツがデモ発表されます。
+[Re:commend-demo](https://ec2023.entcomp.org/cfp.html#h-re-commend-demo%E5%B0%82%E9%96%80%E7%A0%94%E7%A9%B6%E8%80%85%E6%8E%A8%E8%96%A6%E3%83%AC%E3%83%93%E3%83%A5%E3%83%BC)とは、これらの作品を審査員が実際に体験し、
+その上でその人にとって主観的に好ましいと思われたコンテンツを一つ選んで、
+学会の最後にて審査員がその作品をビブリオバトルのように「推し語る」制度です。
 
-## この観点を見る理由
+この制度はエンタテインメントの「面白さ」を評価する観点を多角的に捉えるための実践として実施されています。
+実際に語り手自身の経験・価値観と結びつけ、「なぜ刺さったか」を分析する手掛かりになることを期待して、これらの語りが蓄積され続けています。
 
-本ツールでは、語りを主張単位に分解し、評価観点カテゴリで整理する。  
-これにより、次を比較できる:
-
-- どの研究が、どの観点で評価されたか
-- 人手語り (`actual-talk`) と LLM語り (`llm-simulation`) で、観点分布や主張がどうズレるか
-- LLM が人間の語りに近い部分 / 乖離する部分
+c.f. [エンタテインメントシンポジウム2025におけるRe:commend-demoトーク録](https://dl.mtstlab.org/papers/468)
 
 ## このツールの狙い
 
+近年の大規模言語モデルの発展をうけ、EC領域のコンテンツ分析においてどのように利活用できるか、という議論が巻き起こっています。
+例えばコンテンツの仕様が載った論文をLLMに流せば、そのコンテンツで起こりうる体験を言語化することができます。
+その体験の関連に基づいて整理するなど、[EC分野全体の整理手段](https://appbird.github.io/entertainment-design-catalog/)などに活用できるでしょう。
+
+Re:commend-demo の本質は「語り手の経験に基づく語り」にあるため、
+LLM が語れるからといって、Re:commend-demoを直接自動化できるわけではありません。
+しかし、これらがうまく利活用できれば、例えばRe:commend-demoでの言語化するための支援ツールとして、LLMを活用したり
+語りで明瞭に言語化されなかったコンテンツの仕掛けと起こった「面白さ」との対応関係を調べることも可能になると考えられます。
+
+以上のことを踏まえ、本リポジトリでは次の問いに取り組むことを目標に掲げています：
 - 論文を与え、Re:commend-demo の説明付きプロンプトで自由に「刺さり」を語らせたとき、
-  人手の語りにどこまで迫れるか？逆に超過してしまう部分はどこか。
+  人手の語りにどこまで迫れるか？逆に不適当な部分はどこか？
 
-補足:
-- Re:commend-demo の本質は「語り手の経験に基づく語り」にあるため、
-  LLM が語れること自体は Re:commend-demo の価値を置き換えるものではない。
-- 一方で、LLM による体験推定や評価構造の比較は、独立した研究テーマになり得る。
-
-実験手順の整理は [experiments-explanation.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/experiments-explanation.md) を参照。
+実験手順の整理は [experiments-explanation.md](./experiments-explanation.md) を参照。
 実験結果の `.md` は `results/` 配下:
-- [actual-talk.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/results/actual-talk.md)
-- [llm-simulation.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/results/llm-simulation.md)
-- [compare.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/results/compare.md)
+- [actual-talk.md](./results/actual-talk.md)
+- [llm-simulation.md](./results/llm-simulation.md)
+- [compare.md](./results/compare.md)
 
 ## できること
 
