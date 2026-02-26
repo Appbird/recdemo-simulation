@@ -34,7 +34,6 @@ LLM が語れるからといって、Re:commend-demoを直接自動化できる�
 
 実験手順の整理は [experiments-explanation.md](./experiments-explanation.md) を参照。
 実験結果の `.md` は `results/` 配下:
-- [actual-talk.md](./results/actual-talk.md)
 - [llm-simulation.md](./results/llm-simulation.md)
 - [compare.md](./results/compare.md)
 
