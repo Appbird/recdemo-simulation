@@ -6,6 +6,11 @@ from recdemo.core.config import (
     load_default_analysis_input_kind,
     load_default_analysis_output_path,
     load_default_analysis_workers,
+    load_default_compare_left_name,
+    load_default_compare_left_path,
+    load_default_compare_output_path,
+    load_default_compare_right_name,
+    load_default_compare_right_path,
     load_default_model,
 )
 from recdemo.core.paths import DEFAULT_LOG_PATH
@@ -252,11 +257,19 @@ def handle_analysis_step3(args: argparse.Namespace) -> int:
 
 
 def handle_compare_results(args: argparse.Namespace) -> int:
-    left_path: Path = args.left
-    right_path: Path = args.right
-    left_name: str = args.left_name
-    right_name: str = args.right_name
-    output_path: Path | None = args.output
+    config_path: Path = args.config_path
+    left_path: Path | None = args.left or load_default_compare_left_path(config_path)
+    right_path: Path | None = args.right or load_default_compare_right_path(config_path)
+    left_name: str = args.left_name or load_default_compare_left_name(config_path)
+    right_name: str = args.right_name or load_default_compare_right_name(config_path)
+    output_path: Path | None = args.output or load_default_compare_output_path(config_path)
+
+    if left_path is None or right_path is None:
+        print(
+            "Missing compare inputs. Provide both left/right args or set [compare].left and [compare].right in config.",
+            file=sys.stderr,
+        )
+        return 1
 
     for p in [left_path, right_path]:
         if not p.exists():

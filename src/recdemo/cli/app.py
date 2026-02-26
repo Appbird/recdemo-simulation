@@ -70,23 +70,30 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Optional path to original narration text to use as context for category assignment",
     )
-    compare_parser.add_argument("left", type=Path, help="First result markdown file")
-    compare_parser.add_argument("right", type=Path, help="Second result markdown file")
+    compare_parser.add_argument("left", type=Path, nargs="?", help="First result markdown file")
+    compare_parser.add_argument("right", type=Path, nargs="?", help="Second result markdown file")
     compare_parser.add_argument(
         "--left-name",
-        default="A",
-        help="Display name for the first result in comparison output (default: A)",
+        default=None,
+        help="Display name for the first result in comparison output (default: [compare].left_name or A)",
     )
     compare_parser.add_argument(
         "--right-name",
-        default="B",
-        help="Display name for the second result in comparison output (default: B)",
+        default=None,
+        help="Display name for the second result in comparison output (default: [compare].right_name or B)",
     )
     compare_parser.add_argument(
         "--output",
         type=Path,
         default=None,
         help="Optional output file path (e.g. outputs/compare.md)",
+    )
+    compare_parser.add_argument(
+        "--config",
+        dest="config_path",
+        type=Path,
+        default=DEFAULT_CONFIG_PATH,
+        help="Path to config TOML for compare defaults",
     )
 
     for target_parser in [
