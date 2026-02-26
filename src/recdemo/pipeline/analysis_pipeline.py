@@ -28,11 +28,12 @@ def extract_reasons(model: str, narration: str) -> str:
     )
 
 
-def assign_categories(model: str, reasons: str, category_definition: str) -> str:
+def assign_categories(model: str, reasons: str, category_definition: str, context_text: str) -> str:
     system_prompt = build_analysis_system_prompt()
     user_prompt = build_assign_categories_prompt(
         reasons=reasons,
         category_definition=category_definition,
+        context_text=context_text,
     )
     return generate_response(
         model=model,
@@ -77,6 +78,7 @@ def run_analysis_structured(
         model=model,
         reasons=reasons,
         category_definition=category_definition,
+        context_text=narration,
     )
     logger.info("analysis step 3/3 completed")
 

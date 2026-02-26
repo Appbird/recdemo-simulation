@@ -9,6 +9,7 @@ class ParsedReport:
     source: Path
     category_counts: dict[str, int]
     research_narrations: dict[str, str]
+    research_points: dict[str, list[str]]
 
 
 def _extract_section_lines(text: str, section_title: str) -> list[str]:
@@ -56,6 +57,7 @@ def parse_report(path: Path) -> ParsedReport:
         source=path,
         category_counts=parse_category_counts(text),
         research_narrations=parse_research_narrations(text),
+        research_points=parse_research_points(text),
     )
 
 
@@ -98,6 +100,27 @@ def parse_research_narrations(text: str) -> dict[str, str]:
     return narrations
 
 
+def parse_research_points(text: str) -> dict[str, list[str]]:
+    lines = _extract_section_lines(text, "研究ごとの観点比較")
+    points: dict[str, list[str]] = {}
+    current_research: str | None = None
+
+    for raw in lines:
+        line = raw.strip()
+        if line.startswith("### "):
+            current_research = line[4:].strip()
+            points.setdefault(current_research, [])
+            continue
+        if current_research is None:
+            continue
+        if not line.startswith("- ["):
+            continue
+        # Format: - [カテゴリ] 理由
+        points[current_research].append(line[2:].strip())
+
+    return points
+
+
 def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
     categories = sorted(set(left.category_counts) | set(right.category_counts))
 
@@ -133,23 +156,23 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
         for c in flat_only:
             lines.append(f"  - {c}")
 
-    lines.append("\n## 研究ごとの語り比較")
-    research_keys = sorted(set(left.research_narrations) | set(right.research_narrations))
+    lines.append("\n## 研究ごとの評価観点比較")
+    research_keys = sorted(set(left.research_points) | set(right.research_points))
     same_count = 0
     diff_count = 0
     only_a = 0
     only_b = 0
 
     for key in research_keys:
-        a_text = left.research_narrations.get(key)
-        b_text = right.research_narrations.get(key)
-        if a_text is None:
+        a_points = left.research_points.get(key)
+        b_points = right.research_points.get(key)
+        if a_points is None:
             only_b += 1
             continue
-        if b_text is None:
+        if b_points is None:
             only_a += 1
             continue
-        if a_text.strip() == b_text.strip():
+        if set(a_points) == set(b_points):
             same_count += 1
         else:
             diff_count += 1
@@ -160,37 +183,45 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
     lines.append(f"- Bのみ: {only_b} 件")
 
     for key in research_keys:
-        a_text = left.research_narrations.get(key)
-        b_text = right.research_narrations.get(key)
-        if a_text is None and b_text is None:
+        a_points = left.research_points.get(key)
+        b_points = right.research_points.get(key)
+        if a_points is None and b_points is None:
             continue
         lines.append(f"\n### {key}")
-        if a_text is None:
+        if a_points is None:
             lines.append("- ステータス: B のみ")
-            lines.append("#### B")
-            lines.append("```text")
-            lines.append(b_text or "")
-            lines.append("```")
+            for p in b_points or []:
+                lines.append(f"- B: {p}")
             continue
-        if b_text is None:
+        if b_points is None:
             lines.append("- ステータス: A のみ")
-            lines.append("#### A")
-            lines.append("```text")
-            lines.append(a_text)
-            lines.append("```")
+            for p in a_points:
+                lines.append(f"- A: {p}")
             continue
-        if a_text.strip() == b_text.strip():
+        a_set = set(a_points)
+        b_set = set(b_points)
+        common = sorted(a_set & b_set)
+        only_a_points = sorted(a_set - b_set)
+        only_b_points = sorted(b_set - a_set)
+
+        if not only_a_points and not only_b_points:
             lines.append("- ステータス: 一致")
+            for p in common:
+                lines.append(f"- 共通: {p}")
             continue
 
         lines.append("- ステータス: 差分あり")
-        lines.append("#### A")
-        lines.append("```text")
-        lines.append(a_text)
-        lines.append("```")
-        lines.append("#### B")
-        lines.append("```text")
-        lines.append(b_text)
-        lines.append("```")
+        if common:
+            lines.append("- 共通:")
+            for p in common:
+                lines.append(f"  - {p}")
+        if only_a_points:
+            lines.append("- Aのみ:")
+            for p in only_a_points:
+                lines.append(f"  - {p}")
+        if only_b_points:
+            lines.append("- Bのみ:")
+            for p in only_b_points:
+                lines.append(f"  - {p}")
 
     return "\n".join(lines)

@@ -56,8 +56,20 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     step1_parser.add_argument("input", type=Path, help="Path to input PDF file")
     step2_parser.add_argument("input", type=Path, help="Path to narration text file")
     step3_parser.add_argument("input", type=Path, help="Path to reasons text file")
+    step3_parser.add_argument(
+        "--narration",
+        type=Path,
+        default=None,
+        help="Optional path to original narration text to use as context for category assignment",
+    )
     bullet_points_parser.add_argument("input", type=Path, help="Path to narration text file")
     categorize_parser.add_argument("input", type=Path, help="Path to reasons text file")
+    categorize_parser.add_argument(
+        "--narration",
+        type=Path,
+        default=None,
+        help="Optional path to original narration text to use as context for category assignment",
+    )
     compare_parser.add_argument("left", type=Path, help="First result markdown file")
     compare_parser.add_argument("right", type=Path, help="Second result markdown file")
     compare_parser.add_argument(

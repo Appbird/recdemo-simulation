@@ -147,6 +147,7 @@ def handle_analysis(args: argparse.Namespace) -> int:
                 model=model,
                 reasons=reasons,
                 category_definition=category_definition,
+                context_text=narration,
             )
             output_text = f"# 語りの内容\n{narration}\n\n# 評価観点\n{categorized}".strip()
     except Exception as exc:
@@ -225,6 +226,12 @@ def handle_analysis_step3(args: argparse.Namespace) -> int:
     reasons = _read_text_file(input_path, "Failed to read reasons file")
     if reasons is None:
         return 1
+    context_text = reasons
+    if args.narration is not None:
+        narration = _read_text_file(args.narration, "Failed to read narration file")
+        if narration is None:
+            return 1
+        context_text = narration
 
     model = args.llm or load_default_model(args.config_path)
     category_definition = build_category_definition()
@@ -234,6 +241,7 @@ def handle_analysis_step3(args: argparse.Namespace) -> int:
             model=model,
             reasons=reasons,
             category_definition=category_definition,
+            context_text=context_text,
         )
     except Exception as exc:
         print(f"Analysis step3 failed: {exc}", file=sys.stderr)

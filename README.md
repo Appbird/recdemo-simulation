@@ -109,7 +109,7 @@ uv run src/cli.py compare-results outputs/actual-talk.md outputs/llm-simulation.
 - 観点別 該当研究数の比較表
 - 観点ごとの差分（B-A）
 - 増減サマリ
-- 研究ごとの語り比較（A/Bの語り本文を直接比較）
+- 研究ごとの評価観点比較（`[カテゴリ] 理由` の共通 / 差分）
 
 ## プロンプトファイル
 

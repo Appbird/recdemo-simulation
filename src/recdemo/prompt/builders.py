@@ -90,7 +90,7 @@ def build_extract_reasons_prompt(narration: str) -> str:
     )
 
 
-def build_assign_categories_prompt(reasons: str, category_definition: str) -> str:
+def build_assign_categories_prompt(reasons: str, category_definition: str, context_text: str) -> str:
     raw = _read_prompt_file(
         ANALYSIS_ASSIGN_CATEGORIES_PATH,
         ANALYSIS_ASSIGN_CATEGORIES_PATH.parent.parent / "analysis-assign-categories.txt",
@@ -100,5 +100,6 @@ def build_assign_categories_prompt(reasons: str, category_definition: str) -> st
         {
             "reasons": reasons,
             "category_definition": category_definition,
+            "context_text": context_text,
         },
     )

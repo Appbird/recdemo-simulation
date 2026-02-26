@@ -132,6 +132,7 @@ def _analyze_single_file(
             model=model,
             reasons=reasons,
             category_definition=category_definition,
+            context_text=narration,
         )
     items = parse_categorized_lines(categorized_text)
     return FileAnalysisResult(
