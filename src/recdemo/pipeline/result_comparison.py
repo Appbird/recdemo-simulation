@@ -167,10 +167,15 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
     lines.append("| 観点 | A | B | B-A |")
     lines.append("| --- | ---: | ---: | ---: |")
 
+    category_rows: list[tuple[str, int, int, int]] = []
     for category in categories:
         a = left.category_counts.get(category, 0)
         b = right.category_counts.get(category, 0)
-        lines.append(f"| {category} | {a} | {b} | {b - a:+d} |")
+        diff = b - a
+        category_rows.append((category, a, b, diff))
+    category_rows.sort(key=lambda row: (-abs(row[3]), -row[3], row[0]))
+    for category, a, b, diff in category_rows:
+        lines.append(f"| {category} | {a} | {b} | {diff:+d} |")
 
     lines.append("\n## 研究ごとの観点比較表")
     lines.append("| 研究 | Aにしかない観点 | Bにしかない観点 |")
