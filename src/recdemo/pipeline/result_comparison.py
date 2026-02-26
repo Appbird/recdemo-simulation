@@ -243,28 +243,16 @@ def build_comparison_report(
         lines.append(f"| **{category}** | {a} | {b} | {diff:+d} |")
 
     lines.append("\n## 観点別 研究対応一覧")
-    lines.append(
-        f"| 観点 | {left_name}/{right_name} 両方で該当 | {left_name}でのみ該当 | {right_name}でのみ該当 |"
-    )
-    lines.append("| --- | --- | --- | --- |")
+    lines.append(f"| 観点 | {left_name}でのみ該当 | {right_name}でのみ該当 |")
+    lines.append("| --- | --- | --- |")
     for category in [row[0] for row in category_rows]:
         a_studies = sorted(left_category_to_studies.get(category, set()))
         b_studies = sorted(right_category_to_studies.get(category, set()))
-        common_studies = sorted(set(a_studies) & set(b_studies))
         only_a_studies = sorted(set(a_studies) - set(b_studies))
         only_b_studies = sorted(set(b_studies) - set(a_studies))
-        row_count = max(len(common_studies), len(only_a_studies), len(only_b_studies), 1)
+        row_count = max(len(only_a_studies), len(only_b_studies), 1)
         for idx in range(row_count):
             category_cell = f"**{category}**" if idx == 0 else "^"
-            if idx < len(common_studies):
-                common_cell = _study_with_sample(
-                    common_studies[idx],
-                    category,
-                    left.research_points,
-                    fallback_points=right.research_points,
-                )
-            else:
-                common_cell = "-"
             if idx < len(only_a_studies):
                 only_a_cell = _study_with_sample(
                     only_a_studies[idx],
@@ -281,8 +269,8 @@ def build_comparison_report(
                 )
             else:
                 only_b_cell = "-"
-            lines.append(f"| {category_cell} | {common_cell} | {only_a_cell} | {only_b_cell} |")
-        lines.append("| --- | --- | --- | --- |")
+            lines.append(f"| {category_cell} | {only_a_cell} | {only_b_cell} |")
+        lines.append("| --- | --- | --- |")
 
     lines.append("\n## 研究ごとの観点比較表")
     lines.append(f"| 研究 | {left_name}にしかない観点 | {right_name}にしかない観点 |")
