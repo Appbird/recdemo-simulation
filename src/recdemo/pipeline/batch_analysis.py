@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import re
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 INPUT_KIND_PAPER = "paper"
 INPUT_KIND_NARRATIVE = "narrative"
+PROGRESS_BAR_WIDTH = 28
 
 
 @dataclass(frozen=True)
@@ -151,6 +153,17 @@ def run_analysis_for_directory(
     workers: int,
     input_kind: str,
 ) -> DirectoryAnalysisResult:
+    def _print_progress(completed: int, total: int) -> None:
+        ratio = (completed / total) if total else 1.0
+        filled = int(PROGRESS_BAR_WIDTH * ratio)
+        bar = "#" * filled + "-" * (PROGRESS_BAR_WIDTH - filled)
+        print(
+            f"\r[analysis] [{bar}] {completed}/{total}",
+            end="",
+            file=sys.stderr,
+            flush=True,
+        )
+
     if input_kind == INPUT_KIND_PAPER:
         files = discover_input_files(root_dir)
     else:
@@ -167,6 +180,9 @@ def run_analysis_for_directory(
         )
 
     logger.info("directory analysis: %d files discovered under %s", len(files), root_dir)
+    total = len(files)
+    completed = 0
+    _print_progress(completed=0, total=total)
 
     with ThreadPoolExecutor(max_workers=max(1, workers)) as executor:
         future_map = {
@@ -186,10 +202,14 @@ def run_analysis_for_directory(
                 result = future.result()
             except Exception as exc:
                 failures.append(FileAnalysisError(file_path=file_path, error_message=str(exc)))
-                logger.info("directory analysis failed: %s", file_path)
-                continue
-            successes.append(result)
-            logger.info("directory analysis completed: %s", file_path)
+                logger.debug("directory analysis failed: %s", file_path)
+            else:
+                successes.append(result)
+                logger.debug("directory analysis completed: %s", file_path)
+            finally:
+                completed += 1
+                _print_progress(completed=completed, total=total)
+    print(file=sys.stderr)
 
     successes.sort(key=lambda r: str(r.file_path))
     failures.sort(key=lambda r: str(r.file_path))
