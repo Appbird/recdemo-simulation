@@ -77,6 +77,18 @@ def _study_link(study: str) -> str:
     return f"[{study}](#{_anchor_slug(study)})"
 
 
+def _study_with_sample(
+    study: str,
+    category: str,
+    primary_points: dict[str, list[str]],
+    fallback_points: dict[str, list[str]] | None = None,
+) -> str:
+    sample = _sample_reason_for_category(primary_points.get(study, []), category)
+    if sample == "-" and fallback_points is not None:
+        sample = _sample_reason_for_category(fallback_points.get(study, []), category)
+    return f"{_study_link(study)}: {_format_table_cell(sample)}"
+
+
 def _extract_section_lines(text: str, section_title: str) -> list[str]:
     lines = text.splitlines()
     collected: list[str] = []
@@ -244,9 +256,31 @@ def build_comparison_report(
         row_count = max(len(common_studies), len(only_a_studies), len(only_b_studies), 1)
         for idx in range(row_count):
             category_cell = f"**{category}**" if idx == 0 else "^"
-            common_cell = _study_link(common_studies[idx]) if idx < len(common_studies) else "-"
-            only_a_cell = _study_link(only_a_studies[idx]) if idx < len(only_a_studies) else "-"
-            only_b_cell = _study_link(only_b_studies[idx]) if idx < len(only_b_studies) else "-"
+            if idx < len(common_studies):
+                common_cell = _study_with_sample(
+                    common_studies[idx],
+                    category,
+                    left.research_points,
+                    fallback_points=right.research_points,
+                )
+            else:
+                common_cell = "-"
+            if idx < len(only_a_studies):
+                only_a_cell = _study_with_sample(
+                    only_a_studies[idx],
+                    category,
+                    left.research_points,
+                )
+            else:
+                only_a_cell = "-"
+            if idx < len(only_b_studies):
+                only_b_cell = _study_with_sample(
+                    only_b_studies[idx],
+                    category,
+                    right.research_points,
+                )
+            else:
+                only_b_cell = "-"
             lines.append(f"| {category_cell} | {common_cell} | {only_a_cell} | {only_b_cell} |")
         lines.append("| --- | --- | --- | --- |")
 
