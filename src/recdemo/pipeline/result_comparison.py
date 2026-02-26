@@ -316,10 +316,6 @@ def build_comparison_report(
     for key in research_keys:
         a_points = sorted(set(left.research_points.get(key, [])))
         b_points = sorted(set(right.research_points.get(key, [])))
-        a_set = set(a_points)
-        b_set = set(b_points)
-        only_a_points = sorted(a_set - b_set)
-        only_b_points = sorted(b_set - a_set)
 
         lines.append(f"\n### {key}")
         lines.append(f"\n#### {left_name}の主張")
@@ -331,18 +327,6 @@ def build_comparison_report(
         lines.append(f"\n#### {right_name}の主張")
         if b_points:
             for p in b_points:
-                lines.append(f"- {_bold_category_prefix(p)}")
-        else:
-            lines.append("- なし")
-        lines.append(f"\n#### {left_name}にしかない主張")
-        if only_a_points:
-            for p in only_a_points:
-                lines.append(f"- {_bold_category_prefix(p)}")
-        else:
-            lines.append("- なし")
-        lines.append(f"\n#### {right_name}にしかない主張")
-        if only_b_points:
-            for p in only_b_points:
                 lines.append(f"- {_bold_category_prefix(p)}")
         else:
             lines.append("- なし")
