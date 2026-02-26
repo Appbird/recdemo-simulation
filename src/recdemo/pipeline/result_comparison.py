@@ -244,6 +244,7 @@ def build_comparison_report(
             only_a_cell = _study_link(only_a_studies[idx]) if idx < len(only_a_studies) else "-"
             only_b_cell = _study_link(only_b_studies[idx]) if idx < len(only_b_studies) else "-"
             lines.append(f"| {category_cell} | {common_cell} | {only_a_cell} | {only_b_cell} |")
+        lines.append("| --- | --- | --- | --- |")
 
     lines.append("\n## 研究ごとの観点比較表")
     lines.append(f"| 研究 | {left_name}にしかない観点 | {right_name}にしかない観点 |")
@@ -271,6 +272,7 @@ def build_comparison_report(
             else:
                 only_b_text = "-"
             lines.append(f"| {study_cell} | {only_a_text} | {only_b_text} |")
+        lines.append("| --- | --- | --- |")
 
     lines.append("\n## 研究ごとの差分詳細")
     for key in research_keys:
