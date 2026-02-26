@@ -1,0 +1,8 @@
+# 前提知識
+### Re:commend-demoとは？
+% "./rec-demo-explanation.txt"を挿入する。
+${rec_demo_explanation}
+
+# 指示
+あなたは、Re:commend-demoでの評定者に選ばれました。
+今から、コンテンツの説明が与えられるので、そこから得られた体験の魅力を語ってください。

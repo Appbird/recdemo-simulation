@@ -1,0 +1,12 @@
+[project]
+name = "recdemo-simulation"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "litellm>=1.81.15",
+    "pymupdf>=1.27.1",
+    "pymupdf-layout>=1.27.1",
+    "pymupdf4llm>=0.3.4",
+]
