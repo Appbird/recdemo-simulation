@@ -181,6 +181,15 @@ def parse_research_points(text: str) -> dict[str, list[str]]:
 def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
     categories = sorted(set(left.category_counts) | set(right.category_counts))
     research_keys = sorted(set(left.research_points) | set(right.research_points))
+    left_category_to_studies: dict[str, set[str]] = {category: set() for category in categories}
+    right_category_to_studies: dict[str, set[str]] = {category: set() for category in categories}
+    for key in research_keys:
+        left_categories = _collect_research_categories(left.research_points.get(key, []))
+        right_categories = _collect_research_categories(right.research_points.get(key, []))
+        for category in left_categories:
+            left_category_to_studies.setdefault(category, set()).add(key)
+        for category in right_categories:
+            right_category_to_studies.setdefault(category, set()).add(key)
 
     lines: list[str] = []
     lines.append("# 比較結果")
@@ -188,6 +197,7 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
     lines.append(f"- B: {right.source}")
     lines.append("\n## 目次")
     lines.append("- [観点別 該当研究数 差分](#観点別-該当研究数-差分)")
+    lines.append("- [観点別 研究対応一覧](#観点別-研究対応一覧)")
     lines.append("- [研究ごとの観点比較表](#研究ごとの観点比較表)")
     lines.append("- [研究ごとの差分詳細](#研究ごとの差分詳細)")
     for key in research_keys:
@@ -206,6 +216,18 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
     category_rows.sort(key=lambda row: (-row[3], row[0]))
     for category, a, b, diff in category_rows:
         lines.append(f"| **{category}** | {a} | {b} | {diff:+d} |")
+
+    lines.append("\n## 観点別 研究対応一覧")
+    lines.append("| 観点 | AB両方で該当 | Aで該当 | Bで該当 |")
+    lines.append("| --- | --- | --- | --- |")
+    for category in [row[0] for row in category_rows]:
+        a_studies = sorted(left_category_to_studies.get(category, set()))
+        b_studies = sorted(right_category_to_studies.get(category, set()))
+        common_studies = sorted(set(a_studies) & set(b_studies))
+        common_text = ", ".join(common_studies) if common_studies else "-"
+        a_text = ", ".join(a_studies) if a_studies else "-"
+        b_text = ", ".join(b_studies) if b_studies else "-"
+        lines.append(f"| **{category}** | {common_text} | {a_text} | {b_text} |")
 
     lines.append("\n## 研究ごとの観点比較表")
     lines.append("| 研究 | Aにしかない観点 | Bにしかない観点 |")
