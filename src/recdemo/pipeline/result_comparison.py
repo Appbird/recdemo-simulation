@@ -59,6 +59,16 @@ def _format_table_cell(text: str, max_len: int = 120) -> str:
     return normalized.replace("|", "\\|")
 
 
+def _bold_category_prefix(point: str) -> str:
+    # Format: [カテゴリ] 理由 or [カテゴリ1, カテゴリ2] 理由
+    if not point.startswith("[") or "]" not in point:
+        return point
+    end = point.index("]")
+    categories = point[1:end].strip()
+    reason = point[end + 1 :].strip()
+    return f"[**{categories}**] {reason}"
+
+
 def _extract_section_lines(text: str, section_title: str) -> list[str]:
     lines = text.splitlines()
     collected: list[str] = []
@@ -237,25 +247,25 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
         lines.append("\n#### Aの主張")
         if a_points:
             for p in a_points:
-                lines.append(f"- {p}")
+                lines.append(f"- {_bold_category_prefix(p)}")
         else:
             lines.append("- なし")
         lines.append("\n#### Bの主張")
         if b_points:
             for p in b_points:
-                lines.append(f"- {p}")
+                lines.append(f"- {_bold_category_prefix(p)}")
         else:
             lines.append("- なし")
         lines.append("\n#### Aにしかない主張")
         if only_a_points:
             for p in only_a_points:
-                lines.append(f"- {p}")
+                lines.append(f"- {_bold_category_prefix(p)}")
         else:
             lines.append("- なし")
         lines.append("\n#### Bにしかない主張")
         if only_b_points:
             for p in only_b_points:
-                lines.append(f"- {p}")
+                lines.append(f"- {_bold_category_prefix(p)}")
         else:
             lines.append("- なし")
 
