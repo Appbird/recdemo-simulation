@@ -12,6 +12,24 @@ class ParsedReport:
     research_points: dict[str, list[str]]
 
 
+def _extract_categories_from_point(point: str) -> tuple[str, ...]:
+    # Format: [カテゴリ] 理由 or [カテゴリ1, カテゴリ2] 理由
+    if not point.startswith("[") or "]" not in point:
+        return tuple()
+    head = point[1 : point.index("]")]
+    categories = tuple(c.strip() for c in head.split(",") if c.strip())
+    return categories
+
+
+def _collect_research_categories(points: list[str] | None) -> set[str]:
+    if not points:
+        return set()
+    categories: set[str] = set()
+    for point in points:
+        categories.update(_extract_categories_from_point(point))
+    return categories
+
+
 def _extract_section_lines(text: str, section_title: str) -> list[str]:
     lines = text.splitlines()
     collected: list[str] = []
@@ -123,6 +141,7 @@ def parse_research_points(text: str) -> dict[str, list[str]]:
 
 def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
     categories = sorted(set(left.category_counts) | set(right.category_counts))
+    research_keys = sorted(set(left.research_points) | set(right.research_points))
 
     lines: list[str] = []
     lines.append("# 比較結果")
@@ -156,8 +175,19 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
         for c in flat_only:
             lines.append(f"  - {c}")
 
+    lines.append("\n## 研究ごとの観点増減（表）")
+    lines.append("| 研究 | 増えた観点 (B-A) | 減った観点 (A-B) |")
+    lines.append("| --- | --- | --- |")
+    for key in research_keys:
+        a_categories = _collect_research_categories(left.research_points.get(key))
+        b_categories = _collect_research_categories(right.research_points.get(key))
+        added = sorted(b_categories - a_categories)
+        removed = sorted(a_categories - b_categories)
+        added_text = ", ".join(added) if added else "-"
+        removed_text = ", ".join(removed) if removed else "-"
+        lines.append(f"| {key} | {added_text} | {removed_text} |")
+
     lines.append("\n## 研究ごとの評価観点比較")
-    research_keys = sorted(set(left.research_points) | set(right.research_points))
     same_count = 0
     diff_count = 0
     only_a = 0
