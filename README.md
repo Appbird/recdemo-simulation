@@ -189,7 +189,7 @@ uv run src/cli.py compare-results results/actual-talk.md results/llm-simulation.
 uv run src/prompt_demo.py --template src/prompt/examples/simple-template.txt --vars-json src/prompt/examples/simple-vars.json
 ```
 
-詳細は [src/prompt/README.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/src/prompt/README.md) を参照。
+詳細は [src/prompt/README.md](./src/prompt/README.md) を参照。
 
 ## テスト
 
@@ -210,4 +210,4 @@ uv run python -m unittest -q tests.test_prompt_builders
 - `pipeline`: `eval`/`analysis` の実行フロー
   - `batch_analysis.py`: ディレクトリ一括分析と集計レポート
 
-依存・呼び出し関係の詳細は [docs/module-dependencies.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/docs/module-dependencies.md) を参照。
+依存・呼び出し関係の詳細は [docs/module-dependencies.md](./docs/module-dependencies.md) を参照。
