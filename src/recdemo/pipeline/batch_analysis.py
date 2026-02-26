@@ -186,19 +186,6 @@ def format_directory_report(result: DirectoryAnalysisResult) -> str:
     from collections import defaultdict
 
     root_dir = result.root_dir
-    lines: list[str] = []
-    lines.append("# 集計結果")
-    lines.append(
-        f"- 対象フォルダ: {root_dir}\n"
-        f"- 成功: {len(result.successes)} 件 / 失敗: {len(result.failures)} 件"
-    )
-
-    if result.failures:
-        lines.append("\n## 失敗ファイル")
-        for failure in result.failures:
-            rel = failure.file_path.relative_to(root_dir)
-            lines.append(f"- {rel}: {failure.error_message}")
-
     per_research: dict[str, list[CategorizedReason]] = defaultdict(list)
     per_category: dict[str, list[tuple[str, str, str]]] = defaultdict(list)
 
@@ -209,6 +196,26 @@ def format_directory_report(result: DirectoryAnalysisResult) -> str:
             per_research[research_key].append(item)
             for category in item.categories:
                 per_category[category].append((research_key, str(rel), item.reason))
+
+    lines: list[str] = []
+    lines.append("# 集計結果")
+    lines.append(
+        f"- 対象フォルダ: {root_dir}\n"
+        f"- 成功: {len(result.successes)} 件 / 失敗: {len(result.failures)} 件"
+    )
+    lines.append(f"- 該当研究数: {len(per_research)} 件")
+
+    if per_category:
+        lines.append("\n## 観点別 該当研究数")
+        for category in sorted(per_category):
+            study_count = len({research_key for research_key, _, _ in per_category[category]})
+            lines.append(f"- {category}: {study_count} 件")
+
+    if result.failures:
+        lines.append("\n## 失敗ファイル")
+        for failure in result.failures:
+            rel = failure.file_path.relative_to(root_dir)
+            lines.append(f"- {rel}: {failure.error_message}")
 
     lines.append("\n## 研究ごとの観点比較")
     for research in sorted(per_research):
