@@ -74,6 +74,8 @@ uv run src/cli.py analysis PDF/EC2024 --llm L --input-kind narrative
   - 失敗ファイル一覧（あれば）
 
 `--workers` を省略した場合は `configs/default.toml` の `[analysis].workers` を利用。
+`--input-kind` を省略した場合は `[analysis].input_kind` を利用。
+`--output` を省略した場合は `[analysis].output` を利用（空文字なら無効）。
 
 ### 3. analysis の各ステップを単体実行
 

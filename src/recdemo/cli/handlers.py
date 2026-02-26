@@ -2,7 +2,12 @@ import argparse
 import sys
 from pathlib import Path
 
-from recdemo.core.config import load_default_analysis_workers, load_default_model
+from recdemo.core.config import (
+    load_default_analysis_input_kind,
+    load_default_analysis_output_path,
+    load_default_analysis_workers,
+    load_default_model,
+)
 from recdemo.core.paths import DEFAULT_LOG_PATH
 from recdemo.core.types import EvalConfig
 from recdemo.io.content_loader import load_user_prompt_from_input
@@ -62,8 +67,8 @@ def handle_analysis(args: argparse.Namespace) -> int:
     model = args.llm or load_default_model(args.config_path)
     system_prompt = build_system_prompt()
     category_definition = build_category_definition()
-    output_path = args.output
-    input_kind = args.input_kind
+    output_path = args.output or load_default_analysis_output_path(args.config_path)
+    input_kind = args.input_kind or load_default_analysis_input_kind(args.config_path)
 
     if input_path.is_dir():
         workers = args.workers

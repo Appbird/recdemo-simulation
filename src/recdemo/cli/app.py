@@ -86,14 +86,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     analysis_parser.add_argument(
         "--input-kind",
         choices=["paper", "narrative"],
-        default="paper",
-        help="Input kind for analysis. paper: PDF input, narrative: narrative_*.txt input",
+        default=None,
+        help="Input kind for analysis (default: configs/default.toml [analysis].input_kind)",
     )
     analysis_parser.add_argument(
         "--output",
         type=Path,
         default=None,
-        help="Optional output file path (e.g. result.md)",
+        help="Optional output file path (default: configs/default.toml [analysis].output)",
     )
 
     eval_parser.add_argument(

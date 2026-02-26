@@ -60,6 +60,7 @@
 1. `src/cli.py` → `recdemo.cli.app.main()`
 2. `configure_logging()` / `load_dotenv_if_exists()`
 3. `handle_analysis()`
+   - `workers` / `input_kind` / `output` の未指定値は `configs/default.toml` `[analysis]` から補完
 4. `load_default_model()`
 5. `build_system_prompt()`
 6. `load_user_prompt_from_input()`
