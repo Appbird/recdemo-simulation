@@ -39,6 +39,26 @@ def _collect_research_categories(points: list[str] | None) -> set[str]:
     return categories
 
 
+def _extract_reason_text(point: str) -> str:
+    if point.startswith("[") and "]" in point:
+        return point[point.index("]") + 1 :].strip()
+    return point.strip()
+
+
+def _sample_reason_for_category(points: list[str], category: str) -> str:
+    for point in points:
+        if category in _extract_categories_from_point(point):
+            return _extract_reason_text(point)
+    return "-"
+
+
+def _format_table_cell(text: str, max_len: int = 120) -> str:
+    normalized = " ".join(text.split())
+    if len(normalized) > max_len:
+        normalized = normalized[: max_len - 1].rstrip() + "…"
+    return normalized.replace("|", "\\|")
+
+
 def _extract_section_lines(text: str, section_title: str) -> list[str]:
     lines = text.splitlines()
     collected: list[str] = []
@@ -181,13 +201,28 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
     lines.append("| 研究 | Aにしかない観点 | Bにしかない観点 |")
     lines.append("| --- | --- | --- |")
     for key in research_keys:
-        a_categories = _collect_research_categories(left.research_points.get(key))
-        b_categories = _collect_research_categories(right.research_points.get(key))
+        a_points_raw = left.research_points.get(key, [])
+        b_points_raw = right.research_points.get(key, [])
+        a_categories = _collect_research_categories(a_points_raw)
+        b_categories = _collect_research_categories(b_points_raw)
         only_a_categories = sorted(a_categories - b_categories)
         only_b_categories = sorted(b_categories - a_categories)
-        only_a_text = ", ".join(only_a_categories) if only_a_categories else "-"
-        only_b_text = ", ".join(only_b_categories) if only_b_categories else "-"
-        lines.append(f"| [{key}](#{_anchor_slug(key)}) | {only_a_text} | {only_b_text} |")
+        row_count = max(len(only_a_categories), len(only_b_categories), 1)
+        for idx in range(row_count):
+            study_cell = f"[{key}](#{_anchor_slug(key)})" if idx == 0 else "^"
+            if idx < len(only_a_categories):
+                a_category = only_a_categories[idx]
+                a_sample = _sample_reason_for_category(a_points_raw, a_category)
+                only_a_text = f"{a_category}: {_format_table_cell(a_sample)}"
+            else:
+                only_a_text = "-"
+            if idx < len(only_b_categories):
+                b_category = only_b_categories[idx]
+                b_sample = _sample_reason_for_category(b_points_raw, b_category)
+                only_b_text = f"{b_category}: {_format_table_cell(b_sample)}"
+            else:
+                only_b_text = "-"
+            lines.append(f"| {study_cell} | {only_a_text} | {only_b_text} |")
 
     lines.append("\n## 研究ごとの差分詳細")
     for key in research_keys:
