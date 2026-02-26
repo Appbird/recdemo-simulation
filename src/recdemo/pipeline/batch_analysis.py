@@ -166,7 +166,7 @@ def format_directory_report(result: DirectoryAnalysisResult) -> str:
             lines.append(f"- {rel}: {failure.error_message}")
 
     per_research: dict[str, list[CategorizedReason]] = defaultdict(list)
-    per_category: dict[str, list[tuple[str, str]]] = defaultdict(list)
+    per_category: dict[str, list[tuple[str, str, str]]] = defaultdict(list)
 
     for success in result.successes:
         rel = success.file_path.relative_to(root_dir)
@@ -174,7 +174,7 @@ def format_directory_report(result: DirectoryAnalysisResult) -> str:
         for item in success.items:
             per_research[research_key].append(item)
             for category in item.categories:
-                per_category[category].append((str(rel), item.reason))
+                per_category[category].append((research_key, str(rel), item.reason))
 
     lines.append("\n## 研究ごとの観点比較")
     for research in sorted(per_research):
@@ -193,7 +193,9 @@ def format_directory_report(result: DirectoryAnalysisResult) -> str:
     lines.append("\n## 観点ごとの評価比較")
     for category in sorted(per_category):
         lines.append(f"\n### {category}")
-        for rel_path, reason in per_category[category]:
+        study_count = len({research_key for research_key, _, _ in per_category[category]})
+        lines.append(f"- 該当研究数: {study_count}")
+        for _, rel_path, reason in per_category[category]:
             lines.append(f"- ({rel_path}) {reason}")
 
     return "\n".join(lines)
