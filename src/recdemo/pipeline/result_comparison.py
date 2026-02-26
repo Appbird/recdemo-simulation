@@ -69,6 +69,10 @@ def _bold_category_prefix(point: str) -> str:
     return f"[**{categories}**] {reason}"
 
 
+def _study_link(study: str) -> str:
+    return f"[{study}](#{_anchor_slug(study)})"
+
+
 def _extract_section_lines(text: str, section_title: str) -> list[str]:
     lines = text.splitlines()
     collected: list[str] = []
@@ -224,17 +228,22 @@ def build_comparison_report(
 
     lines.append("\n## 観点別 研究対応一覧")
     lines.append(
-        f"| 観点 | {left_name}/{right_name} 両方で該当 | {left_name}で該当 | {right_name}で該当 |"
+        f"| 観点 | {left_name}/{right_name} 両方で該当 | {left_name}でのみ該当 | {right_name}でのみ該当 |"
     )
     lines.append("| --- | --- | --- | --- |")
     for category in [row[0] for row in category_rows]:
         a_studies = sorted(left_category_to_studies.get(category, set()))
         b_studies = sorted(right_category_to_studies.get(category, set()))
         common_studies = sorted(set(a_studies) & set(b_studies))
-        common_text = ", ".join(common_studies) if common_studies else "-"
-        a_text = ", ".join(a_studies) if a_studies else "-"
-        b_text = ", ".join(b_studies) if b_studies else "-"
-        lines.append(f"| **{category}** | {common_text} | {a_text} | {b_text} |")
+        only_a_studies = sorted(set(a_studies) - set(b_studies))
+        only_b_studies = sorted(set(b_studies) - set(a_studies))
+        row_count = max(len(common_studies), len(only_a_studies), len(only_b_studies), 1)
+        for idx in range(row_count):
+            category_cell = f"**{category}**" if idx == 0 else "^"
+            common_cell = _study_link(common_studies[idx]) if idx < len(common_studies) else "-"
+            only_a_cell = _study_link(only_a_studies[idx]) if idx < len(only_a_studies) else "-"
+            only_b_cell = _study_link(only_b_studies[idx]) if idx < len(only_b_studies) else "-"
+            lines.append(f"| {category_cell} | {common_cell} | {only_a_cell} | {only_b_cell} |")
 
     lines.append("\n## 研究ごとの観点比較表")
     lines.append(f"| 研究 | {left_name}にしかない観点 | {right_name}にしかない観点 |")
