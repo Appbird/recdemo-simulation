@@ -41,6 +41,40 @@ uv run src/cli.py analysis P --llm L
 
 実行中は `INFO` ログで進捗（step 1/3〜3/3）を表示。
 
+フォルダを指定した場合:
+
+```bash
+uv run src/cli.py analysis PDF/EC2024 --llm L --workers 8
+```
+
+- フォルダ配下の `.pdf` / `.txt` を再帰探索
+- 各ファイルに同じ3段分析を並列実行
+- 最後に以下をまとめて出力
+  - 研究ごとの観点比較
+  - 観点ごとの評価比較
+  - 失敗ファイル一覧（あれば）
+
+### 3. analysis の各ステップを単体実行
+
+```bash
+# step1: 入力コンテンツから語り生成（= eval）
+uv run src/cli.py analysis-step1 P --llm L
+
+# step2: 語りテキストから評価根拠の箇条書き抽出
+uv run src/cli.py analysis-step2 narration.txt --llm L
+
+# step3: 根拠箇条書きにカテゴリ割り当て
+uv run src/cli.py analysis-step3 reasons.txt --llm L
+```
+
+短い別名コマンド:
+
+```bash
+uv run src/cli.py eval P --llm L
+uv run src/cli.py bullet-points narration.txt --llm L
+uv run src/cli.py categorize reasons.txt --llm L
+```
+
 ## プロンプトファイル
 
 `src/prompt/` 配下で管理:
@@ -82,5 +116,6 @@ uv run python -m unittest -q tests.test_prompt_builders
 - `io`: 入出力（PDF読み込み、結果保存）
 - `llm`: LiteLLMクライアント
 - `pipeline`: `eval`/`analysis` の実行フロー
+  - `batch_analysis.py`: ディレクトリ一括分析と集計レポート
 
 依存・呼び出し関係の詳細は [docs/module-dependencies.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/docs/module-dependencies.md) を参照。

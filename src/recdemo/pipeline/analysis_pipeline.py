@@ -10,6 +10,14 @@ from recdemo.prompt.builders import (
 logger = logging.getLogger(__name__)
 
 
+def generate_narration(model: str, system_prompt: str, source_content: str) -> str:
+    return generate_response(
+        model=model,
+        system_prompt=system_prompt,
+        user_prompt=source_content,
+    )
+
+
 def extract_reasons(model: str, narration: str) -> str:
     system_prompt = build_analysis_system_prompt()
     user_prompt = build_extract_reasons_prompt(narration=narration)
@@ -34,11 +42,26 @@ def assign_categories(model: str, reasons: str, category_definition: str) -> str
 
 
 def run_analysis(model: str, system_prompt: str, source_content: str, category_definition: str) -> str:
-    logger.info("analysis step 1/3: generating narrative")
-    narration = generate_response(
+    narration, categorized_reasons = run_analysis_structured(
         model=model,
         system_prompt=system_prompt,
-        user_prompt=source_content,
+        source_content=source_content,
+        category_definition=category_definition,
+    )
+    return f"# 語りの内容\n{narration}\n\n# 評価観点\n{categorized_reasons}".strip()
+
+
+def run_analysis_structured(
+    model: str,
+    system_prompt: str,
+    source_content: str,
+    category_definition: str,
+) -> tuple[str, str]:
+    logger.info("analysis step 1/3: generating narrative")
+    narration = generate_narration(
+        model=model,
+        system_prompt=system_prompt,
+        source_content=source_content,
     )
     logger.info("analysis step 1/3 completed")
 
@@ -57,4 +80,4 @@ def run_analysis(model: str, system_prompt: str, source_content: str, category_d
     )
     logger.info("analysis step 3/3 completed")
 
-    return f"# 語りの内容\n{narration}\n\n# 評価観点\n{categorized_reasons}".strip()
+    return narration, categorized_reasons

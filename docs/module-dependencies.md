@@ -29,6 +29,8 @@
   - depends on: `recdemo.core.types`, `recdemo.io.result_store`, `recdemo.llm.client`
 - `recdemo.pipeline.analysis_pipeline`
   - depends on: `recdemo.llm.client`, `recdemo.prompt.builders`
+- `recdemo.pipeline.batch_analysis`
+  - depends on: `recdemo.io.content_loader`, `recdemo.pipeline.analysis_pipeline`
 - `recdemo.prompt.builders`
   - depends on: `recdemo.core.paths`
 - `recdemo.io.content_loader`
@@ -67,6 +69,29 @@
    2. step 2/3: 根拠箇条書き（`build_extract_reasons_prompt` → `generate_response`）
    3. step 3/3: カテゴリ割当（`build_assign_categories_prompt` → `generate_response`）
 9. stdoutへ整形済み結果を出力
+
+フォルダ入力時:
+1. `run_analysis_for_directory()` で `.pdf` / `.txt` を再帰収集
+2. スレッド並列で各ファイルを3段分析
+3. `format_directory_report()` で以下を比較表示
+   - 研究ごとの観点比較
+   - 観点ごとの評価比較
+   - 失敗ファイル
+
+### `analysis-step1/2/3` の呼び出し
+
+1. `src/cli.py` → `recdemo.cli.app.main()`
+2. `configure_logging()` / `load_dotenv_if_exists()`
+3. `handle_analysis_stepX()` を実行
+4. 各stepで `recdemo.pipeline.analysis_pipeline` の対応関数を実行
+   - step1: `generate_narration`
+   - step2: `extract_reasons`
+   - step3: `assign_categories`
+
+補足:
+- `eval` は実質 step1 相当の生成コマンド。
+- `bullet-points` は `analysis-step2` のエイリアス。
+- `categorize` は `analysis-step3` のエイリアス。
 
 ## 補足
 

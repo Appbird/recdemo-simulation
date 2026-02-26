@@ -7,7 +7,13 @@ from recdemo.core.paths import DEFAULT_CONFIG_PATH, DOTENV_PATH
 from recdemo.runtime.env import load_dotenv_if_exists
 from recdemo.runtime.logging import configure_logging
 
-from .handlers import handle_analysis, handle_eval
+from .handlers import (
+    handle_analysis,
+    handle_analysis_step1,
+    handle_analysis_step2,
+    handle_analysis_step3,
+    handle_eval,
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -19,8 +25,36 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "analysis",
         help="Generate narration and categorize reasons by evaluation category",
     )
+    step1_parser = subparsers.add_parser(
+        "analysis-step1",
+        help="Analysis step1 only: generate narration from paper/content input",
+    )
+    step2_parser = subparsers.add_parser(
+        "analysis-step2",
+        help="Analysis step2 only: extract bullet reasons from narration text",
+    )
+    step3_parser = subparsers.add_parser(
+        "analysis-step3",
+        help="Analysis step3 only: assign categories to reason bullets",
+    )
+    bullet_points_parser = subparsers.add_parser(
+        "bullet-points",
+        help="Alias of analysis-step2: extract bullet reasons from narration text",
+    )
+    categorize_parser = subparsers.add_parser(
+        "categorize",
+        help="Alias of analysis-step3: assign categories to reason bullets",
+    )
 
-    for target_parser in [eval_parser, analysis_parser]:
+    for target_parser in [
+        eval_parser,
+        analysis_parser,
+        step1_parser,
+        step2_parser,
+        step3_parser,
+        bullet_points_parser,
+        categorize_parser,
+    ]:
         target_parser.add_argument("input", type=Path, help="Path to input file (.pdf or text)")
         target_parser.add_argument(
             "--llm",
@@ -35,6 +69,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
             default=DEFAULT_CONFIG_PATH,
             help="Path to config TOML for default model",
         )
+
+    analysis_parser.add_argument(
+        "--workers",
+        type=int,
+        default=4,
+        help="Worker count for directory analysis (used only when input is a directory)",
+    )
 
     eval_parser.add_argument(
         "--no-log",
@@ -53,5 +94,10 @@ def main(argv: list[str] | None = None) -> int:
     handlers = {
         "eval": handle_eval,
         "analysis": handle_analysis,
+        "analysis-step1": handle_analysis_step1,
+        "analysis-step2": handle_analysis_step2,
+        "analysis-step3": handle_analysis_step3,
+        "bullet-points": handle_analysis_step2,
+        "categorize": handle_analysis_step3,
     }
     return handlers[args.command](args)
