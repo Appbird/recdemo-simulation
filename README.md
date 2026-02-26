@@ -41,7 +41,12 @@ uv run src/cli.py analysis P --llm L
 
 実行中は `INFO` ログで進捗（step 1/3〜3/3）を表示。
 
-`analysis` の入力は PDF のみ対応。
+`analysis` の入力は `--input-kind` で切り替え:
+- `paper` (default): PDF
+- `narrative`: `narrative_*.txt`
+
+`--input-kind narrative` を指定すると、`narrative_*.txt` を入力として
+「主張ポイント抽出 -> カテゴリ割り当て」の2段で処理。
 
 結果をファイル保存する場合:
 
@@ -54,10 +59,15 @@ uv run src/cli.py analysis P --llm L --output result.md
 ```bash
 uv run src/cli.py analysis PDF/EC2024 --llm L --workers 8
 uv run src/cli.py analysis PDF/EC2024 --llm L --workers 8 --output result.md
+uv run src/cli.py analysis PDF/EC2024 --llm L --input-kind paper
+uv run src/cli.py analysis PDF/EC2024 --llm L --input-kind narrative
 ```
 
-- フォルダ配下の `.pdf` を再帰探索
-- 各ファイルに同じ3段分析を並列実行
+- `--input-kind paper`: フォルダ配下の `.pdf` を再帰探索
+- `--input-kind narrative`: フォルダ配下の `narrative_*.txt` を再帰探索
+- 各ファイルを input-kind に応じて並列実行
+  - paper: 3段分析（語り生成 -> 抽出 -> カテゴリ）
+  - narrative: 2段分析（抽出 -> カテゴリ）
 - 最後に以下をまとめて出力
   - 研究ごとの観点比較
   - 観点ごとの評価比較

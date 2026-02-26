@@ -13,6 +13,8 @@ from recdemo.pipeline.analysis_pipeline import (
     run_analysis,
 )
 from recdemo.pipeline.batch_analysis import (
+    INPUT_KIND_NARRATIVE,
+    INPUT_KIND_PAPER,
     format_directory_report,
     run_analysis_for_directory,
 )
@@ -61,6 +63,7 @@ def handle_analysis(args: argparse.Namespace) -> int:
     system_prompt = build_system_prompt()
     category_definition = build_category_definition()
     output_path = args.output
+    input_kind = args.input_kind
 
     if input_path.is_dir():
         workers = args.workers
@@ -73,6 +76,7 @@ def handle_analysis(args: argparse.Namespace) -> int:
                 system_prompt=system_prompt,
                 category_definition=category_definition,
                 workers=workers,
+                input_kind=input_kind,
             )
             report = format_directory_report(batch_result)
         except Exception as exc:
@@ -84,19 +88,43 @@ def handle_analysis(args: argparse.Namespace) -> int:
         print(report)
         return 0
 
-    if input_path.suffix.lower() != ".pdf":
-        print(f"Analysis input must be a PDF file: {input_path}", file=sys.stderr)
+    if input_kind == INPUT_KIND_PAPER:
+        if input_path.suffix.lower() != ".pdf":
+            print(f"Analysis input must be a PDF file for input-kind=paper: {input_path}", file=sys.stderr)
+            return 1
+    elif input_kind == INPUT_KIND_NARRATIVE:
+        if input_path.suffix.lower() != ".txt" or not input_path.name.startswith("narrative_"):
+            print(
+                "Analysis input must be a narrative text file (narrative_*.txt) "
+                f"for input-kind=narrative: {input_path}",
+                file=sys.stderr,
+            )
+            return 1
+    else:
+        print(f"Unsupported input kind: {input_kind}", file=sys.stderr)
         return 1
 
-    user_prompt = load_user_prompt_from_input(input_path)
-
     try:
-        output_text = run_analysis(
-            model=model,
-            system_prompt=system_prompt,
-            source_content=user_prompt,
-            category_definition=category_definition,
-        )
+        if input_kind == INPUT_KIND_PAPER:
+            user_prompt = load_user_prompt_from_input(input_path)
+            output_text = run_analysis(
+                model=model,
+                system_prompt=system_prompt,
+                source_content=user_prompt,
+                category_definition=category_definition,
+            )
+        else:
+            narration = input_path.read_text(encoding="utf-8")
+            reasons = extract_reasons(
+                model=model,
+                narration=narration,
+            )
+            categorized = assign_categories(
+                model=model,
+                reasons=reasons,
+                category_definition=category_definition,
+            )
+            output_text = f"# 語りの内容\n{narration}\n\n# 評価観点\n{categorized}".strip()
     except Exception as exc:
         print(f"Analysis failed: {exc}", file=sys.stderr)
         return 1

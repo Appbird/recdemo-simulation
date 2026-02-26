@@ -84,6 +84,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Worker count for directory analysis (default: configs/default.toml [analysis].workers)",
     )
     analysis_parser.add_argument(
+        "--input-kind",
+        choices=["paper", "narrative"],
+        default="paper",
+        help="Input kind for analysis. paper: PDF input, narrative: narrative_*.txt input",
+    )
+    analysis_parser.add_argument(
         "--output",
         type=Path,
         default=None,

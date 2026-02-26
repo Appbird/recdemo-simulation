@@ -8,11 +8,12 @@ from pathlib import Path
 
 from recdemo.io.content_loader import load_user_prompt_from_input
 
-from .analysis_pipeline import run_analysis_structured
+from .analysis_pipeline import assign_categories, extract_reasons, run_analysis_structured
 
 logger = logging.getLogger(__name__)
 
-SUPPORTED_INPUT_SUFFIXES = {".pdf"}
+INPUT_KIND_PAPER = "paper"
+INPUT_KIND_NARRATIVE = "narrative"
 
 
 @dataclass(frozen=True)
@@ -49,7 +50,22 @@ def discover_input_files(root_dir: Path) -> list[Path]:
             continue
         if path.name.startswith("."):
             continue
-        if path.suffix.lower() not in SUPPORTED_INPUT_SUFFIXES:
+        if path.suffix.lower() != ".pdf":
+            continue
+        files.append(path)
+    return files
+
+
+def discover_narrative_files(root_dir: Path) -> list[Path]:
+    files: list[Path] = []
+    for path in sorted(root_dir.rglob("*")):
+        if not path.is_file():
+            continue
+        if path.name.startswith("."):
+            continue
+        if path.suffix.lower() != ".txt":
+            continue
+        if not path.name.startswith("narrative_"):
             continue
         files.append(path)
     return files
@@ -80,14 +96,27 @@ def _analyze_single_file(
     model: str,
     system_prompt: str,
     category_definition: str,
+    input_kind: str,
 ) -> FileAnalysisResult:
-    source_content = load_user_prompt_from_input(file_path)
-    narration, categorized_text = run_analysis_structured(
-        model=model,
-        system_prompt=system_prompt,
-        source_content=source_content,
-        category_definition=category_definition,
-    )
+    if input_kind == INPUT_KIND_PAPER:
+        source_content = load_user_prompt_from_input(file_path)
+        narration, categorized_text = run_analysis_structured(
+            model=model,
+            system_prompt=system_prompt,
+            source_content=source_content,
+            category_definition=category_definition,
+        )
+    else:
+        narration = file_path.read_text(encoding="utf-8")
+        reasons = extract_reasons(
+            model=model,
+            narration=narration,
+        )
+        categorized_text = assign_categories(
+            model=model,
+            reasons=reasons,
+            category_definition=category_definition,
+        )
     items = parse_categorized_lines(categorized_text)
     return FileAnalysisResult(
         file_path=file_path,
@@ -103,8 +132,12 @@ def run_analysis_for_directory(
     system_prompt: str,
     category_definition: str,
     workers: int,
+    input_kind: str,
 ) -> DirectoryAnalysisResult:
-    files = discover_input_files(root_dir)
+    if input_kind == INPUT_KIND_PAPER:
+        files = discover_input_files(root_dir)
+    else:
+        files = discover_narrative_files(root_dir)
     successes: list[FileAnalysisResult] = []
     failures: list[FileAnalysisError] = []
 
@@ -125,6 +158,7 @@ def run_analysis_for_directory(
                 model,
                 system_prompt,
                 category_definition,
+                input_kind,
             ): file_path
             for file_path in files
         }
