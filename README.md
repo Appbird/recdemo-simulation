@@ -43,10 +43,17 @@ uv run src/cli.py analysis P --llm L
 
 `analysis` の入力は PDF のみ対応。
 
+結果をファイル保存する場合:
+
+```bash
+uv run src/cli.py analysis P --llm L --output result.md
+```
+
 フォルダを指定した場合:
 
 ```bash
 uv run src/cli.py analysis PDF/EC2024 --llm L --workers 8
+uv run src/cli.py analysis PDF/EC2024 --llm L --workers 8 --output result.md
 ```
 
 - フォルダ配下の `.pdf` を再帰探索

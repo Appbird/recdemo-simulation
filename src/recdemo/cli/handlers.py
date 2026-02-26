@@ -60,6 +60,7 @@ def handle_analysis(args: argparse.Namespace) -> int:
     model = args.llm or load_default_model(args.config_path)
     system_prompt = build_system_prompt()
     category_definition = build_category_definition()
+    output_path = args.output
 
     if input_path.is_dir():
         workers = args.workers
@@ -77,6 +78,9 @@ def handle_analysis(args: argparse.Namespace) -> int:
         except Exception as exc:
             print(f"Analysis failed: {exc}", file=sys.stderr)
             return 1
+        if output_path is not None:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            output_path.write_text(report, encoding="utf-8")
         print(report)
         return 0
 
@@ -97,6 +101,9 @@ def handle_analysis(args: argparse.Namespace) -> int:
         print(f"Analysis failed: {exc}", file=sys.stderr)
         return 1
 
+    if output_path is not None:
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        output_path.write_text(output_text, encoding="utf-8")
     print(output_text)
     return 0
 

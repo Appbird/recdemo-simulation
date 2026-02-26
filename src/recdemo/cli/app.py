@@ -83,6 +83,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Worker count for directory analysis (default: configs/default.toml [analysis].workers)",
     )
+    analysis_parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+        help="Optional output file path (e.g. result.md)",
+    )
 
     eval_parser.add_argument(
         "--no-log",
