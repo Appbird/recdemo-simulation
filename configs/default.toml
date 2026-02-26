@@ -7,8 +7,8 @@ input_kind = "paper"
 output = ""
 
 [compare]
-left = ""
-right = ""
-left_name = "A"
-right_name = "B"
-output = ""
+left = "outputs/actual-talk.md"
+right = "outputs/llm-simulation.md"
+left_name = "actual-talk"
+right_name = "llm-sim"
+output = "outputs/compare.md"
