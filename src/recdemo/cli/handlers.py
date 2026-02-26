@@ -254,6 +254,8 @@ def handle_analysis_step3(args: argparse.Namespace) -> int:
 def handle_compare_results(args: argparse.Namespace) -> int:
     left_path: Path = args.left
     right_path: Path = args.right
+    left_name: str = args.left_name
+    right_name: str = args.right_name
     output_path: Path | None = args.output
 
     for p in [left_path, right_path]:
@@ -264,7 +266,12 @@ def handle_compare_results(args: argparse.Namespace) -> int:
     try:
         left = parse_report(left_path)
         right = parse_report(right_path)
-        content = build_comparison_report(left, right)
+        content = build_comparison_report(
+            left,
+            right,
+            left_name=left_name,
+            right_name=right_name,
+        )
     except Exception as exc:
         print(f"Compare failed: {exc}", file=sys.stderr)
         return 1

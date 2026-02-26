@@ -178,7 +178,12 @@ def parse_research_points(text: str) -> dict[str, list[str]]:
     return points
 
 
-def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
+def build_comparison_report(
+    left: ParsedReport,
+    right: ParsedReport,
+    left_name: str = "A",
+    right_name: str = "B",
+) -> str:
     categories = sorted(set(left.category_counts) | set(right.category_counts))
     research_keys = sorted(set(left.research_points) | set(right.research_points))
     left_category_to_studies: dict[str, set[str]] = {category: set() for category in categories}
@@ -193,8 +198,8 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
 
     lines: list[str] = []
     lines.append("# 比較結果")
-    lines.append(f"- A: {left.source}")
-    lines.append(f"- B: {right.source}")
+    lines.append(f"- {left_name}: {left.source}")
+    lines.append(f"- {right_name}: {right.source}")
     lines.append("\n## 目次")
     lines.append("- [観点別 該当研究数 差分](#観点別-該当研究数-差分)")
     lines.append("- [観点別 研究対応一覧](#観点別-研究対応一覧)")
@@ -204,7 +209,7 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
         lines.append(f"- [研究: {key}](#{_anchor_slug(key)})")
 
     lines.append("\n## 観点別 該当研究数 差分")
-    lines.append("| 観点 | A | B | B-A |")
+    lines.append(f"| 観点 | {left_name} | {right_name} | {right_name}-{left_name} |")
     lines.append("| --- | ---: | ---: | ---: |")
 
     category_rows: list[tuple[str, int, int, int]] = []
@@ -218,7 +223,9 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
         lines.append(f"| **{category}** | {a} | {b} | {diff:+d} |")
 
     lines.append("\n## 観点別 研究対応一覧")
-    lines.append("| 観点 | AB両方で該当 | Aで該当 | Bで該当 |")
+    lines.append(
+        f"| 観点 | {left_name}/{right_name} 両方で該当 | {left_name}で該当 | {right_name}で該当 |"
+    )
     lines.append("| --- | --- | --- | --- |")
     for category in [row[0] for row in category_rows]:
         a_studies = sorted(left_category_to_studies.get(category, set()))
@@ -230,7 +237,7 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
         lines.append(f"| **{category}** | {common_text} | {a_text} | {b_text} |")
 
     lines.append("\n## 研究ごとの観点比較表")
-    lines.append("| 研究 | Aにしかない観点 | Bにしかない観点 |")
+    lines.append(f"| 研究 | {left_name}にしかない観点 | {right_name}にしかない観点 |")
     lines.append("| --- | --- | --- |")
     for key in research_keys:
         a_points_raw = left.research_points.get(key, [])
@@ -266,25 +273,25 @@ def build_comparison_report(left: ParsedReport, right: ParsedReport) -> str:
         only_b_points = sorted(b_set - a_set)
 
         lines.append(f"\n### {key}")
-        lines.append("\n#### Aの主張")
+        lines.append(f"\n#### {left_name}の主張")
         if a_points:
             for p in a_points:
                 lines.append(f"- {_bold_category_prefix(p)}")
         else:
             lines.append("- なし")
-        lines.append("\n#### Bの主張")
+        lines.append(f"\n#### {right_name}の主張")
         if b_points:
             for p in b_points:
                 lines.append(f"- {_bold_category_prefix(p)}")
         else:
             lines.append("- なし")
-        lines.append("\n#### Aにしかない主張")
+        lines.append(f"\n#### {left_name}にしかない主張")
         if only_a_points:
             for p in only_a_points:
                 lines.append(f"- {_bold_category_prefix(p)}")
         else:
             lines.append("- なし")
-        lines.append("\n#### Bにしかない主張")
+        lines.append(f"\n#### {right_name}にしかない主張")
         if only_b_points:
             for p in only_b_points:
                 lines.append(f"- {_bold_category_prefix(p)}")

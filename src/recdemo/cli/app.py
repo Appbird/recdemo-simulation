@@ -73,6 +73,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     compare_parser.add_argument("left", type=Path, help="First result markdown file")
     compare_parser.add_argument("right", type=Path, help="Second result markdown file")
     compare_parser.add_argument(
+        "--left-name",
+        default="A",
+        help="Display name for the first result in comparison output (default: A)",
+    )
+    compare_parser.add_argument(
+        "--right-name",
+        default="B",
+        help="Display name for the second result in comparison output (default: B)",
+    )
+    compare_parser.add_argument(
         "--output",
         type=Path,
         default=None,
