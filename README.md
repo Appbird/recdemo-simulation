@@ -1,6 +1,25 @@
 # Re:commend-demo Simulation
 
-Re:commend-demo の語り生成と評価観点分析を行うCLIツール。
+Re:commend-demo の語りをLLMに生成させる試みと、評価観点分析を行うCLIツール。
+
+## このツールの狙い
+
+このツールは次の問いを試すために作った:
+
+- 「LLM は Re:commend-demo に登壇できるか？」
+- 論文を与え、Re:commend-demo の説明付きプロンプトで自由に「刺さり」を語らせたとき、
+  人手の語りにどこまで迫れるか？
+
+補足:
+- Re:commend-demo の本質は「語り手の経験に基づく語り」にあるため、
+  LLM が語れること自体は Re:commend-demo の価値を置き換えるものではない。
+- 一方で、LLM による体験推定や評価構造の比較は、独立した研究テーマになり得る。
+
+実験手順の整理は [experiments-explanation.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/experiments-explanation.md) を参照。
+実験結果の `.md` は `results/` 配下:
+- [actual-talk.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/results/actual-talk.md)
+- [llm-simulation.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/results/llm-simulation.md)
+- [compare.md](/Users/rkawaguchi/Documents/Projects/katayose-lab/interaction-2026/recdemo-simulation/results/compare.md)
 
 ## できること
 
@@ -101,8 +120,8 @@ uv run src/cli.py categorize reasons.txt --llm L
 ### 4. 2つの集計結果を比較
 
 ```bash
-uv run src/cli.py compare-results outputs/actual-talk.md outputs/llm-simulation.md
-uv run src/cli.py compare-results outputs/actual-talk.md outputs/llm-simulation.md --output outputs/compare.md
+uv run src/cli.py compare-results results/actual-talk.md results/llm-simulation.md
+uv run src/cli.py compare-results results/actual-talk.md results/llm-simulation.md --output results/compare.md
 ```
 
 出力内容:
